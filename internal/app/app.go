@@ -44,6 +44,7 @@ func NewApplication(cfg *config.Config) *Application {
 	modules := []Module{
 		NewUserModule(ctx),
 		NewAuthModule(ctx, tokenService),
+		NewAdminModule(cfg),
 	}
 
 	routes.RegisterRoutes(r, tokenService, authRepo, getModuleRoutes(modules)...)
