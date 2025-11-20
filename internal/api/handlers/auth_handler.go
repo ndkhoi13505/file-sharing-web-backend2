@@ -103,17 +103,38 @@ func getUserIDFromContext(c *gin.Context) (string, bool) {
 }
 
 func (h *AuthHandler) SetupTOTP(c *gin.Context) {
-	userID, ok := getUserIDFromContext(c)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized or invalid token"})
-		return
-	}
+	if authErr, exists := c.Get("authError"); exists {
+        switch authErr {
+			case "required":
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error":   "Unauthorized",
+					"message": "Bearer token is required",
+				})
+			case "invalid":
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error":   "Unauthorized",
+					"message": "Invalid or expired access token",
+				})
+			}
+        return
+    }
 
-	resp, err := h.auth_service.SetupTOTP(userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    userID, ok := getUserIDFromContext(c)
+    if !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{
+            "error":   "Unauthorized",
+            "message": "Invalid or expired access token",
+        })
+        return
+    }
+
+    resp, err := h.auth_service.SetupTOTP(userID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":   "TOTP secret generated",
@@ -126,15 +147,37 @@ type VerifyTOTPRequest struct {
 }
 
 func (h *AuthHandler) VerifyTOTP(c *gin.Context) {
-	userID, ok := getUserIDFromContext(c)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized or invalid token"})
-		return
-	}
+	if authErr, exists := c.Get("authError"); exists {
+        switch authErr {
+			case "required":
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error":   "Unauthorized",
+					"message": "Bearer token is required",
+				})
+			case "invalid":
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error":   "Unauthorized",
+					"message": "Invalid or expired access token",
+				})
+			}
+        return
+    }
+
+    userID, ok := getUserIDFromContext(c)
+    if !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{
+            "error":   "Unauthorized",
+            "message": "Invalid or expired access token",
+        })
+        return
+    }
 
 	var req VerifyTOTPRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid TOTP code",
+			"message": "The provided code is incorrect or expired",
+		})
 		return
 	}
 
@@ -145,12 +188,14 @@ func (h *AuthHandler) VerifyTOTP(c *gin.Context) {
 	}
 
 	if !okVerify {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid TOTP code"})
-		return
+		c.JSON(http.StatusUnauthorized, gin.H{
+            "error":   "Unauthorized",
+            "message": "Invalid or expired access token",
+        })
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":     "TOTP verified and enabled successfully",
+		"message":     "TOTP verified successfully",
 		"totpEnabled": true,
 	})
 }
