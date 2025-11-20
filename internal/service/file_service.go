@@ -26,7 +26,7 @@ type FileService interface {
 	GetMyFiles(ctx context.Context, userID string, params domain.ListFileParams) (interface{}, error)
 	DeleteFile(ctx context.Context, fileID string, userID string) error
 	GetFileInfo(ctx context.Context, token string, userID string) (interface{}, error) // Cần cho download
-	DownloadFile(ctx context.Context, token string, userID string, password string) ([]byte, error)
+	DownloadFile(ctx context.Context, token string, userID string, password string) (*domain.File, []byte, error)
 }
 
 type fileService struct {
@@ -247,39 +247,40 @@ func (s *fileService) GetFileInfo(ctx context.Context, token string, userID stri
 	}, nil
 }
 
-func (s *fileService) DownloadFile(ctx context.Context, token string, userID string, password string) ([]byte, error) {
+func (s *fileService) DownloadFile(ctx context.Context, token string, userID string, password string) (*domain.File, []byte, error) {
 	fileInfo, err := s.getFileInfo(ctx, token, userID)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if fileInfo.HasPassword {
 		if password == "" {
-			return nil, fmt.Errorf("password needed to view file")
+			return nil, nil, fmt.Errorf("password needed to view file")
 		}
 
-		hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			return nil, utils.WrapError(err, "Failed to hash password", utils.ErrCodeInternal)
-		}
-		hashStr := string(hashed)
-		userPasswordHash := &hashStr
+		// hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		// if err != nil {
+		// 	return nil, utils.WrapError(err, "Failed to hash password", utils.ErrCodeInternal)
+		// }
+		// hashStr := string(hashed)
+		// userPasswordHash := &hashStr
+		// log.Println(password, *userPasswordHash, *fileInfo.PasswordHash)
 
-		if userPasswordHash != fileInfo.PasswordHash {
-			return nil, fmt.Errorf("invalid password for file")
+		if bcrypt.CompareHashAndPassword([]byte(*fileInfo.PasswordHash), []byte(password)) != nil {
+			return nil, nil, fmt.Errorf("invalid password for file")
 		}
 	}
 
 	fileReader, err := s.storage.GetFile(fileInfo.Id)
 	if err != nil {
-		return nil, utils.WrapError(err, "Failed to retrieve file from storage", utils.ErrCodeInternal)
+		return nil, nil, utils.WrapError(err, "Failed to retrieve file from storage", utils.ErrCodeInternal)
 	}
 
 	file, err := io.ReadAll(fileReader)
 	if err != nil {
-		return nil, utils.WrapError(err, "Failed to prepare file", utils.ErrCodeInternal)
+		return nil, nil, utils.WrapError(err, "Failed to prepare file", utils.ErrCodeInternal)
 	}
 
-	return file, err
+	return fileInfo, file, nil
 }

@@ -160,11 +160,11 @@ func (fh *FileHandler) DownloadFile(ctx *gin.Context) {
 		userID = nil
 	}
 
-	result, err := fh.file_service.DownloadFile(ctx, fileToken, userID.(string), password)
+	info, file, err := fh.file_service.DownloadFile(ctx, fileToken, userID.(string), password)
 	if err != nil {
 		utils.ResponseError(ctx, utils.WrapError(err, "Failed to download file", utils.ErrCodeInternal))
 		return
 	}
 
-	ctx.Data(http.StatusOK, "application/octet-stream", result)
+	ctx.Data(http.StatusOK, info.MimeType, file)
 }
