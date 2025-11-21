@@ -1,10 +1,10 @@
 package service
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
-	"encoding/base64"
 
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/domain"
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/infrastructure/jwt"
@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/pquerna/otp/totp"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/skip2/go-qrcode"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type authService struct {
@@ -92,7 +92,7 @@ func (as *authService) Login(email, password string) (*domain.User, string, erro
 
 func (as *authService) LoginTOTP(id, totpCode string) (*domain.User, string, error) {
 	user := &domain.User{}
-		err := as.userRepo.FindById(id, user)
+	err := as.userRepo.FindById(id, user)
 	if err != nil {
 		fmt.Println("Login failed: User not found")
 		return nil, "", utils.NewError("Invalid ID", utils.ErrCodeUnauthorized)
