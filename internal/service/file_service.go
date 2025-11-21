@@ -275,5 +275,9 @@ func (s *fileService) DownloadFile(ctx context.Context, token string, userID str
 		return nil, nil, err
 	}
 
+	if err := s.fileRepo.RegisterDownload(ctx, fileInfo.Id, userID); err != nil {
+		return nil, nil, err
+	}
+
 	return fileInfo, file, nil
 }

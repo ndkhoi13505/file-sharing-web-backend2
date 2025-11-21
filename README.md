@@ -128,15 +128,9 @@ docker exec -it postgres-db psql -U postgres
 
 # Đã vào shell của postgres
 
-CREATE USER haixon WITH PASSWORD "123456";
+CREATE USER haixon WITH SUPERUSER PASSWORD '123456';
 
 CREATE DATABASE "file-sharing";
-
-\c "file-sharing";
-
-GRANT ALL PRIVILEGES ON DATABASE "file-sharing" TO haixon;
-
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO haixon;
 
 exit;
 ```

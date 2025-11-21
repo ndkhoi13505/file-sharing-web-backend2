@@ -27,6 +27,13 @@ CREATE TABLE IF NOT EXISTS files (
     CONSTRAINT files_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS filestat (
+    file_id UUID NOT NULL,
+    download_count BIGINT DEFAULT 0,
+    user_download_count BIGINT DEFAULT 0,
+    CONSTRAINT filestat_file_id_fkey FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS shared (
     user_id UUID NOT NULL,
     file_id UUID NOT NULL,
@@ -55,7 +62,24 @@ CREATE TABLE IF NOT EXISTS user_totp (
     secret TEXT NOT NULL,
     CONSTRAINT user_totp_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS usersLoginSession (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     cid UUID NOT NULL
-)
+);
+
+CREATE PROCEDURE proc_download(f_id UUID, u_id UUID)
+LANGUAGE SQL
+AS $$
+    UPDATE filestat 
+    SET 
+        download_count = download_count + 1
+    WHERE file_id = f_id;
+
+    UPDATE filestat
+    SET
+        user_download_count = user_download_count + 1
+    WHERE file_id = f_id AND NOT EXISTS (SELECT 1 FROM download WHERE user_id = u_id);
+
+    INSERT INTO download (file_id, user_id) VALUES (f_id, u_id);
+$$;

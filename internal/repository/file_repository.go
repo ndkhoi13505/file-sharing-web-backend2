@@ -17,6 +17,7 @@ type FileRepository interface {
 	DeleteFile(ctx context.Context, id string, userID string) error
 	GetMyFiles(ctx context.Context, userID string, params domain.ListFileParams) ([]domain.File, error)
 	FindAll(ctx context.Context) ([]domain.File, error)
+	RegisterDownload(ctx context.Context, fileID string, userID string) error
 }
 
 type fileRepository struct {
@@ -53,7 +54,6 @@ func (r *fileRepository) CreateFile(ctx context.Context, file *domain.File) (*do
 			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 		) RETURNING id, created_at
 	`
-
 	err := r.db.QueryRowContext(ctx, query,
 		file.Id,
 		userID,             // $2: user_id (UUID hoặc NULL)
@@ -71,6 +71,10 @@ func (r *fileRepository) CreateFile(ctx context.Context, file *domain.File) (*do
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert file metadata: %w", err)
+	}
+
+	if _, err := r.db.Exec(`INSERT INTO filestat (file_id) VALUES ($1)`, file.Id); err != nil {
+		return nil, fmt.Errorf("failed to insert file stats: %w", err)
 	}
 
 	return file, nil
@@ -276,6 +280,7 @@ func (r *fileRepository) GetMyFiles(ctx context.Context, userID string, params d
 
 	return files, nil
 }
+
 func (r *fileRepository) FindAll(ctx context.Context) ([]domain.File, error) {
 	query := `
         SELECT 
@@ -339,4 +344,9 @@ func (r *fileRepository) FindAll(ctx context.Context) ([]domain.File, error) {
 	}
 
 	return files, nil
+}
+
+func (r *fileRepository) RegisterDownload(ctx context.Context, fileID string, userID string) error {
+	_, err := r.db.ExecContext(ctx, `CALL proc_download($1, $2)`, fileID, userID)
+	return err
 }
