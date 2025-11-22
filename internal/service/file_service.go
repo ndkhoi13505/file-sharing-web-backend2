@@ -188,8 +188,8 @@ func (s *fileService) GetMyFiles(ctx context.Context, userID string, params doma
 	if params.Limit > 0 {
 		totalPages = (totalFiles + params.Limit - 1) / params.Limit
 	}
-	// Logic tính toán Status, HoursRemaining và Summary (Mô phỏng)
-	pagination := gin.H{
+
+  pagination := gin.H{
 		"currentPage": params.Page,
 		"totalPages":  totalPages,
 		"totalFiles":  totalFiles,
@@ -257,12 +257,12 @@ func (s *fileService) getFileInfo(ctx context.Context, token string, userID stri
 func (s *fileService) getFileInfoID(ctx context.Context, id string, userID string) (*domain.File, error) {
 	file, err := s.fileRepo.GetFileByID(ctx, id)
 	if err != nil {
-		return nil, utils.WrapError(err, "Failed to get file info", utils.ErrCodeInternal)
+		return nil, fmt.Errorf("failed to get file info: %w", err)
 	}
 
 	shareds, err := s.sharedRepo.GetUsersSharedWith(ctx, file.Id)
 	if err != nil {
-		return nil, utils.WrapError(err, "Failed to get shared list", utils.ErrCodeInternal)
+		return nil, fmt.Errorf("failed to get shared list: %w", err)
 	}
 
 	if !file.IsPublic {
