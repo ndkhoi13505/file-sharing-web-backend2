@@ -144,7 +144,7 @@ cp example.env .env
 
 Khởi chạy hệ thống bằng Docker:
 ```
-docker compose up --build -d
+docker compose up -d
 ```
 
 Tạo bảng trong PostgreSQL:
