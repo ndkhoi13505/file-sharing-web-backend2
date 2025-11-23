@@ -23,7 +23,10 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing or invalid"})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "Unauthorized",
+				"message": "Bearer token is required",
+			})
 			return
 		}
 
@@ -39,7 +42,42 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		claims, err := jwtService.ParseToken(tokenString)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "Unauthorized",
+				"message": "Invalid Bearer token",
+			})
+			return
+		}
+
+		ctx.Set("user", claims)
+		ctx.Set("userID", claims.UserID)
+		ctx.Next()
+	}
+}
+
+func AuthMiddlewareUpload() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authHeader := ctx.GetHeader("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			return // Skip Authorization if token is missing.
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		isBlacklisted, _ := authRepo.IsTokenBlacklisted(tokenString)
+		if isBlacklisted {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "Token has been revoked",
+			})
+			return
+		}
+
+		claims, err := jwtService.ParseToken(tokenString)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "Unauthorized",
+				"message": "Invalid Bearer token",
+			})
 			return
 		}
 

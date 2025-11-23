@@ -28,7 +28,7 @@ Tính năng:
 | ----------:|:-------------------- |:------- |
 | 2311159    | Lê Thanh Huy         | NHÓM A |
 | 2311681    | Nguyễn Đình Khôi     | NHÓM A |
-| 1234567    | Đậu Minh Khôi        | NHÓM A, Class Diagram |
+| 2311659    | Đậu Minh Khôi        | NHÓM A, Class Diagram |
 | 2311888    | Cao Vũ Hoàng Long    | NHÓM B |
 | 2311906    | Nguyễn Hoàng Long    | NHÓM B |
 | 2312955    | Đặng Hải Sơn         | NHÓM B, Use Case diagram  |

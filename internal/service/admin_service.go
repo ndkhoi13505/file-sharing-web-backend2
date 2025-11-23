@@ -73,29 +73,18 @@ func (s *adminService) CleanupExpiredFiles(ctx context.Context) (int, error) {
 	// Duyệt qua tất cả các file
 	for _, file := range files {
 		// 1. Kiểm tra ngày hết hạn
-		// Nếu AvailableTo đã qua (trước thời điểm hiện tại)
 		if file.AvailableTo.Before(now) {
 
-			// 2. Xóa file vật lý trước
-			// Tên file vật lý được lưu trong file.FileName (giá trị UUID.ext)
 			if err := s.storage.DeleteFile(file.FileName); err != nil {
 				// Log lỗi nhưng tiếp tục sang file tiếp theo
 				log.Printf("Cleanup Error: Failed to delete physical file %s: %v", file.FileName, err)
 				continue
 			}
-
-			// 3. Xóa metadata khỏi DB
-			// Hàm DeleteFile yêu cầu userID. Vì đây là tác vụ Admin, ta giả định có thể
-			// dùng một hàm riêng biệt trong repo hoặc truyền OwnerID nếu tồn tại.
-
-			// Giả định có hàm DeleteFileByID(ctx, fileID) không cần userID
-			// HOẶC sử dụng hàm DeleteFile với ID của Owner (nếu là user upload)
-
 			var ownerID string
 			if file.OwnerId != nil {
 				ownerID = *file.OwnerId
 			} else {
-				// Xử lý file Anonymous: Cần hàm xóa không kiểm tra owner
+
 				log.Printf("Cleanup Warning: Skipping metadata delete for Anonymous file %s. Requires specific repo method.", file.Id)
 				continue
 			}
