@@ -171,8 +171,6 @@ func (fh *FileHandler) GetFileInfo(ctx *gin.Context) {
 
 			"hoursRemaining": file.AvailableTo.Sub(file.AvailableFrom).Hours(),
 
-			"sharedWith": shared,
-
 			"createdAt": file.CreatedAt,
 		},
 	}
@@ -184,6 +182,10 @@ func (fh *FileHandler) GetFileInfo(ctx *gin.Context) {
 			"email":    owner.Email,
 			"role":     owner.Role,
 		}
+	}
+
+	if shared != nil {
+		out["sharedWith"] = shared
 	}
 
 	//utils.ResponseSuccess(ctx, http.StatusOK, "File retrieved successfully", gin.H{"file": result})
