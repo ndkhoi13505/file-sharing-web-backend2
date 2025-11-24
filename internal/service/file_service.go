@@ -246,6 +246,16 @@ func (s *fileService) getFileInfo(ctx context.Context, id string, userID string,
 		return nil, nil, nil, err
 	}
 
+	now := time.Now()
+
+	file.Status = domain.FILE_ACTIVE
+
+	if now.Before(file.AvailableFrom) {
+		file.Status = domain.FILE_PENDING
+	} else if now.After(file.AvailableTo) {
+		file.Status = domain.FILE_EXPIRED
+	}
+
 	owner_ := domain.User{}
 	var owner *domain.User = nil
 	if s.userRepo.FindById(*file.OwnerId, &owner_) == nil {
@@ -257,9 +267,26 @@ func (s *fileService) getFileInfo(ctx context.Context, id string, userID string,
 		return nil, nil, nil, err
 	}
 
-	if !file.IsPublic {
-		if !slices.Contains(shareds.UserIds, userID) && *file.OwnerId != userID {
+	if !file.IsPublic && *file.OwnerId != userID {
+		if !slices.Contains(shareds.UserIds, userID) {
 			return nil, nil, nil, utils.Response(utils.ErrCodeGetForbidden)
+		}
+
+		if file.Status == domain.FILE_EXPIRED {
+			return nil, nil, nil, utils.ResponseArgs(utils.ErrCodeFileExpired,
+				gin.H{
+					"expiredAt": file.AvailableTo,
+				},
+			)
+		}
+
+		if file.Status == domain.FILE_PENDING {
+			return nil, nil, nil, utils.ResponseArgs(utils.ErrCodeFileLocked,
+				gin.H{
+					"availableFrom":       file.AvailableFrom,
+					"hoursUntilAvailable": file.AvailableFrom.Sub(now).Hours(),
+				},
+			)
 		}
 	}
 
@@ -294,11 +321,11 @@ func (s *fileService) DownloadFile(ctx context.Context, token string, userID str
 
 	if fileInfo.HasPassword {
 		if password == "" {
-			return nil, nil, utils.Response(utils.ErrCodeDownloadBearerRequired)
+			return nil, nil, utils.Response(utils.ErrCodeDownloadPasswordInvalid)
 		}
 
 		if bcrypt.CompareHashAndPassword([]byte(*fileInfo.PasswordHash), []byte(password)) != nil {
-			return nil, nil, utils.Response(utils.ErrCodeDownloadBearerRequired)
+			return nil, nil, utils.Response(utils.ErrCodeDownloadPasswordInvalid)
 		}
 	}
 

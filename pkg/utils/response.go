@@ -180,8 +180,7 @@ func (bee *ReturnStatus) Export(c *gin.Context) {
 
 	case ErrCodeFileExpired:
 		out := gin.H{
-			"error":   "File expired",
-			"message": "File has expired",
+			"error": "File expired",
 		}
 		maps.Copy(out, args)
 		c.JSON(410, out)

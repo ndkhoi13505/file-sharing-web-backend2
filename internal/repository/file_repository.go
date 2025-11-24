@@ -275,6 +275,8 @@ func (r *fileRepository) GetMyFiles(ctx context.Context, userID string, params d
 	}
 	defer rows.Close()
 
+	now := time.Now()
+
 	var files []domain.File
 	for rows.Next() {
 		var f domain.File
@@ -285,6 +287,7 @@ func (r *fileRepository) GetMyFiles(ctx context.Context, userID string, params d
 			&f.AvailableFrom, &f.AvailableTo, &f.EnableTOTP, &f.CreatedAt,
 			&f.IsPublic,
 		)
+
 		if err != nil {
 			return nil, utils.ResponseMsg(utils.ErrCodeDatabaseError, err.Error())
 		}
@@ -292,6 +295,14 @@ func (r *fileRepository) GetMyFiles(ctx context.Context, userID string, params d
 		// Gán giá trị sau khi scan
 		if ownerID.Valid {
 			f.OwnerId = &ownerID.String
+		}
+
+		f.Status = "active"
+
+		if now.Before(f.AvailableFrom) {
+			f.Status = "pending"
+		} else if now.After(f.AvailableTo) {
+			f.Status = "expired"
 		}
 
 		files = append(files, f)

@@ -2,6 +2,14 @@ package domain
 
 import "time"
 
+type FileStatus string
+
+const (
+	FILE_PENDING FileStatus = "pending"
+	FILE_ACTIVE  FileStatus = "active"
+	FILE_EXPIRED FileStatus = "expired"
+)
+
 type File struct {
 	Id            string     `json:"id" db:"id"`
 	OwnerId       *string    `json:"ownerId" db:"user_id"`
@@ -17,7 +25,7 @@ type File struct {
 	AvailableFrom time.Time  `json:"availableFrom" db:"available_from"`
 	AvailableTo   time.Time  `json:"availableTo" db:"available_to"`
 	ValidityDays  int        `json:"-" db:"validity_days"`
-	Status        string     `json:"status"`
+	Status        FileStatus `json:"status"`
 	CreatedAt     time.Time  `json:"createdAt" db:"created_at"`
 	UpdatedAt     *time.Time `json:"-" db:"updated_at"`
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/api/dto"
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/domain"
@@ -151,14 +150,6 @@ func (fh *FileHandler) GetFileInfo(ctx *gin.Context) {
 		return
 	}
 
-	now := time.Now()
-	status := "active"
-	if now.After(file.AvailableTo) {
-		status = "expired"
-	} else if now.Before(file.AvailableFrom) {
-		status = "locked"
-	}
-
 	out := gin.H{
 		"id":          file.Id,
 		"fileName":    file.FileName,
@@ -171,7 +162,7 @@ func (fh *FileHandler) GetFileInfo(ctx *gin.Context) {
 
 		"availableFrom": file.AvailableFrom,
 		"availableTo":   file.AvailableTo,
-		"status":        status,
+		"status":        file.Status,
 
 		"hoursRemaining": file.AvailableTo.Sub(file.AvailableFrom).Hours(),
 
