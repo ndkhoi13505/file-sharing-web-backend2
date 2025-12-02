@@ -3,6 +3,7 @@ package app
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/config"
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/api/routes"
@@ -10,6 +11,7 @@ import (
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/infrastructure/jwt"
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/infrastructure/storage"
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/internal/repository"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,6 +32,15 @@ type ModuleContext struct {
 func NewApplication(cfg *config.Config) *Application {
 
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	if err := database.InitDB(); err != nil {
 		log.Fatalf("unable to connnect to db: %v", err)

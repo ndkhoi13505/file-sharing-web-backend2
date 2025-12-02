@@ -24,11 +24,18 @@ func (us *userService) GetUserById(id string) (*domain.User, error) {
 	return user, nil
 }
 
-func (us *userService) GetUserByEmail(email string) (*domain.User, error) {
+func (us *userService) GetUserByEmail(email string) (*domain.UserResponse, error) {
 	user := &domain.User{}
 	err := us.userRepo.FindByEmail(email, user)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	resp := &domain.UserResponse{
+		Id:         user.Id,
+		Username:   user.Username,
+		Email:      user.Email,
+		Role:       user.Role,
+		EnableTOTP: user.EnableTOTP,
+	}
+	return resp, nil
 }

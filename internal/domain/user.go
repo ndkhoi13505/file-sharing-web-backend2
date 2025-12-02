@@ -15,3 +15,11 @@ type UserCreate struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type UserResponse struct {
+	Id         string `json:"id"`
+	Username   string `json:"username" `
+	Email      string `json:"email" `
+	Role       string `json:"role"`
+	EnableTOTP bool   `json:"totpEnabled"`
+}

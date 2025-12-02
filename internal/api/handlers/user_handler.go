@@ -35,7 +35,7 @@ func (uh *UserHandler) GetUserById(ctx *gin.Context) {
 		user = *createdUser
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": user})
+	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
 
 func (uh *UserHandler) GetUserByEmail(ctx *gin.Context) {
@@ -44,7 +44,7 @@ func (uh *UserHandler) GetUserByEmail(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email query parameter is required"})
 		return
 	}
-	var user domain.User
+	var user domain.UserResponse
 	createdUser, err := uh.user_service.GetUserByEmail(email)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -56,5 +56,5 @@ func (uh *UserHandler) GetUserByEmail(ctx *gin.Context) {
 	} else {
 		user = *createdUser
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": user})
+	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }

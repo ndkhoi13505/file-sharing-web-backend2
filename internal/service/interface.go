@@ -17,7 +17,7 @@ type TOTPSetupResponse struct {
 
 type UserService interface {
 	GetUserById(id string) (*domain.User, error)
-	GetUserByEmail(email string) (*domain.User, error)
+	GetUserByEmail(email string) (*domain.UserResponse, error)
 }
 
 type AuthService interface {
