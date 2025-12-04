@@ -8,30 +8,39 @@ on:
 jobs:
   run-ci-testing:
     runs-on: self-hosted
-    env:
-      SERVER_PORT: ${{ secrets.SERVER_PORT }}
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
-      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Check Go
-        run: go version
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.25.4
+
+      - name: Create .env from secrets
+        run: |
+          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" > .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_SSLMODE=${{ secrets.DB_SSLMODE }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+
       - name: Start containers
         run: docker compose up -d
+
       - name: Wait for PostgreSQL to be ready
         run: |
           echo "Waiting for PostgreSQL..."
           until docker exec postgres-db pg_isready -U "$DB_USER" -d "$DB_NAME"; do
             sleep 2
           done
-          echo "Ready"
-      - name: Build
+          echo "PostgreSQL is ready"
+
+      - name: Build Go application
         run: go build -v ./...
+
       - name: Run tests
         run: go test -v ./...
