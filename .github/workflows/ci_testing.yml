@@ -16,7 +16,7 @@ jobs:
         run: go version
 
       - name: Create .env from secrets
-        shell: pwsh
+        shell: powershell
         run: |
           "@
           SERVER_PORT=${{ secrets.SERVER_PORT }}
