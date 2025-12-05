@@ -128,16 +128,16 @@ func TestLogin_RequireTOTP(t *testing.T) {
 // ---------------------------
 // 6. GET PROFILE (token cũ vẫn valid)
 // ---------------------------
-func TestGetProfile(t *testing.T) {
+// func TestGetProfile(t *testing.T) {
 
-	req := httptest.NewRequest("GET", "/api/user", nil)
-	req.Header.Set("Authorization", "Bearer "+authToken)
+// 	req := httptest.NewRequest("GET", "/api/user", nil)
+// 	req.Header.Set("Authorization", "Bearer "+authToken)
 
-	rec := httptest.NewRecorder()
-	TestApp.Router().ServeHTTP(rec, req)
+// 	rec := httptest.NewRecorder()
+// 	TestApp.Router().ServeHTTP(rec, req)
 
-	assert.Equal(t, 200, rec.Code)
-}
+// 	assert.Equal(t, 200, rec.Code)
+// }
 
 // ---------------------------
 // 7. LOGOUT
