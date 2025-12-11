@@ -65,7 +65,7 @@ func setupUserAndToken(t *testing.T) (string, string) {
 }
 
 // uploadFileForTest: Helper upload with full options
-func uploadFileForTest(t *testing.T, token string, password string, availableFrom string, availableTo string, sharedWith string) (string, string) {
+func uploadFileForTest(t *testing.T, token string, password string, availableFrom string, availableTo string, sharedWith []string) (string, string) {
 	var buf bytes.Buffer
 	writer := multipart.NewWriter(&buf)
 
@@ -89,8 +89,9 @@ func uploadFileForTest(t *testing.T, token string, password string, availableFro
 	if availableTo != "" {
 		writer.WriteField("availableTo", availableTo)
 	}
-	if sharedWith != "" {
-		writer.WriteField("sharedWith", sharedWith)
+
+	for _, share := range sharedWith {
+		writer.WriteField("sharedWith", share)
 	}
 
 	writer.Close()
@@ -129,7 +130,7 @@ func uploadFileForTest(t *testing.T, token string, password string, availableFro
 func TestUpload_Scenarios(t *testing.T) {
 	// Case: Anonymous Upload
 	t.Run("Anonymous Upload", func(t *testing.T) {
-		id, token := uploadFileForTest(t, "", "", "", "", "")
+		id, token := uploadFileForTest(t, "", "", "", "", nil)
 		assert.NotEmpty(t, id)
 		assert.NotEmpty(t, token)
 	})
@@ -137,7 +138,7 @@ func TestUpload_Scenarios(t *testing.T) {
 	// Case: Auth Upload
 	t.Run("Authenticated Upload", func(t *testing.T) {
 		token, _ := setupUserAndToken(t)
-		id, shareToken := uploadFileForTest(t, token, "", "", "", "")
+		id, shareToken := uploadFileForTest(t, token, "", "", "", nil)
 		assert.NotEmpty(t, id)
 		assert.NotEmpty(t, shareToken)
 	})
@@ -157,7 +158,7 @@ func TestUpload_Scenarios(t *testing.T) {
 
 func TestDownload_PublicFile(t *testing.T) {
 	token, _ := setupUserAndToken(t)
-	_, shareToken := uploadFileForTest(t, "", "", "", "", "") // Anonymous file
+	_, shareToken := uploadFileForTest(t, "", "", "", "", nil) // Anonymous file
 
 	req, _ := http.NewRequest("GET", "/api/files/"+shareToken+"/download", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -170,7 +171,7 @@ func TestDownload_PublicFile(t *testing.T) {
 func TestDownload_PasswordProtected(t *testing.T) {
 	token, _ := setupUserAndToken(t)
 	pass := "SecurePass123"
-	_, shareToken := uploadFileForTest(t, "", pass, "", "", "")
+	_, shareToken := uploadFileForTest(t, "", pass, "", "", nil)
 
 	// Wrong password
 	t.Run("Wrong Password", func(t *testing.T) {
@@ -194,12 +195,13 @@ func TestDownload_PasswordProtected(t *testing.T) {
 func TestDownload_TimeRestricted(t *testing.T) {
 	ownerToken, _ := setupUserAndToken(t)
 	downloaderToken, downloaderEmail := setupUserAndToken(t)
-	sharedJson := fmt.Sprintf(`["%s"]`, downloaderEmail)
+
+	sharedWidth := []string{downloaderEmail}
 
 	// Case 1: Locked File (Private + Shared + Future Start)
 	t.Run("Locked File Shared User", func(t *testing.T) {
 		future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
-		_, shareToken := uploadFileForTest(t, ownerToken, "", future, "", sharedJson)
+		_, shareToken := uploadFileForTest(t, ownerToken, "", future, "", sharedWidth)
 
 		req, _ := http.NewRequest("GET", "/api/files/"+shareToken+"/download", nil)
 		req.Header.Set("Authorization", "Bearer "+downloaderToken)
@@ -213,7 +215,7 @@ func TestDownload_TimeRestricted(t *testing.T) {
 	t.Run("Expired File Shared User", func(t *testing.T) {
 		pastFrom := time.Now().Add(-48 * time.Hour).UTC().Format(time.RFC3339)
 		pastTo := time.Now().Add(-24 * time.Hour).UTC().Format(time.RFC3339)
-		_, shareToken := uploadFileForTest(t, ownerToken, "", pastFrom, pastTo, sharedJson)
+		_, shareToken := uploadFileForTest(t, ownerToken, "", pastFrom, pastTo, sharedWidth)
 
 		req, _ := http.NewRequest("GET", "/api/files/"+shareToken+"/download", nil)
 		req.Header.Set("Authorization", "Bearer "+downloaderToken)
@@ -227,7 +229,7 @@ func TestDownload_TimeRestricted(t *testing.T) {
 	// Case 3: Owner Bypass
 	t.Run("Owner Bypass Time Check", func(t *testing.T) {
 		future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
-		_, shareToken := uploadFileForTest(t, ownerToken, "", future, "", "")
+		_, shareToken := uploadFileForTest(t, ownerToken, "", future, "", nil)
 
 		req, _ := http.NewRequest("GET", "/api/files/"+shareToken+"/download", nil)
 		req.Header.Set("Authorization", "Bearer "+ownerToken) // Owner Token
@@ -241,7 +243,7 @@ func TestDownload_TimeRestricted(t *testing.T) {
 func TestDelete_Operations(t *testing.T) {
 	// Anonymous
 	t.Run("Anonymous Delete Fail", func(t *testing.T) {
-		fileId, _ := uploadFileForTest(t, "", "", "", "", "")
+		fileId, _ := uploadFileForTest(t, "", "", "", "", nil)
 		req, _ := http.NewRequest("DELETE", "/api/files/"+fileId, nil)
 		rec := httptest.NewRecorder()
 		TestApp.Router().ServeHTTP(rec, req)
@@ -251,7 +253,7 @@ func TestDelete_Operations(t *testing.T) {
 	// Owner
 	t.Run("Owner Delete Success", func(t *testing.T) {
 		token, _ := setupUserAndToken(t)
-		fileId, _ := uploadFileForTest(t, token, "", "", "", "")
+		fileId, _ := uploadFileForTest(t, token, "", "", "", nil)
 
 		req, _ := http.NewRequest("DELETE", "/api/files/"+fileId, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
@@ -264,7 +266,7 @@ func TestDelete_Operations(t *testing.T) {
 	t.Run("Attacker Delete Fail", func(t *testing.T) {
 		ownerToken, _ := setupUserAndToken(t)
 		attackerToken, _ := setupUserAndToken(t)
-		fileId, _ := uploadFileForTest(t, ownerToken, "", "", "", "")
+		fileId, _ := uploadFileForTest(t, ownerToken, "", "", "", nil)
 
 		req, _ := http.NewRequest("DELETE", "/api/files/"+fileId, nil)
 		req.Header.Set("Authorization", "Bearer "+attackerToken)
@@ -276,8 +278,8 @@ func TestDelete_Operations(t *testing.T) {
 
 func TestMyFiles_List(t *testing.T) {
 	token, _ := setupUserAndToken(t)
-	uploadFileForTest(t, token, "", "", "", "")
-	uploadFileForTest(t, token, "", "", "", "")
+	uploadFileForTest(t, token, "", "", "", nil)
+	uploadFileForTest(t, token, "", "", "", nil)
 
 	req, _ := http.NewRequest("GET", "/api/files/my?page=1&limit=10", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
