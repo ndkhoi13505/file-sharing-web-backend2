@@ -42,7 +42,7 @@ func (fh *FileHandler) UploadFile(ctx *gin.Context) {
 	}
 
 	if req.Password != nil {
-		if len(*req.Password) < 6 {
+		if len(*req.Password) < 8 {
 			utils.ResponseMsg(utils.ErrCodeBadRequest, "Password must be at least 6 characters long").Export(ctx)
 			return
 		}
