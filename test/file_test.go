@@ -298,7 +298,7 @@ func TestGetInfo_Operations(t *testing.T) {
 		token, _ := setupUserAndToken(t)
 		fileId, _ := uploadFileForTest(t, token, "", "", "", nil)
 
-		req, _ := http.NewRequest("GET", "/api/files/info/"+fileId, nil)
+		req, _ := http.NewRequest("GET", "/files/info/"+fileId, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 
 		rec := httptest.NewRecorder()
@@ -317,7 +317,7 @@ func TestGetInfo_Operations(t *testing.T) {
 		attackerToken, _ := setupUserAndToken(t)
 		fileId, _ := uploadFileForTest(t, ownerToken, "", "", "", nil) // Default is private if token exists
 
-		req, _ := http.NewRequest("GET", "/api/files/info/"+fileId, nil)
+		req, _ := http.NewRequest("GET", "/files/info/"+fileId, nil)
 		req.Header.Set("Authorization", "Bearer "+attackerToken)
 
 		rec := httptest.NewRecorder()
@@ -329,7 +329,7 @@ func TestGetInfo_Operations(t *testing.T) {
 	// 3. Not found
 	t.Run("File Not Found", func(t *testing.T) {
 		token, _ := setupUserAndToken(t)
-		req, _ := http.NewRequest("GET", "/api/files/info/non-existent-id", nil)
+		req, _ := http.NewRequest("GET", "/files/info/non-existent-id", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 
 		rec := httptest.NewRecorder()
@@ -345,7 +345,7 @@ func TestPublic_Info_By_ShareToken(t *testing.T) {
 	_, shareToken := uploadFileForTest(t, token, "", "", "", nil)
 
 	t.Run("Get Public Info via ShareToken", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/api/files/public/"+shareToken, nil)
+		req, _ := http.NewRequest("GET", "/files/public/"+shareToken, nil)
 
 		rec := httptest.NewRecorder()
 		TestApp.Router().ServeHTTP(rec, req)
