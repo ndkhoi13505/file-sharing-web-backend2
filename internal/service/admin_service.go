@@ -136,9 +136,9 @@ func (s *adminService) CleanupExpiredFiles(ctx context.Context) (int, *utils.Ret
 		// 1. Kiểm tra ngày hết hạn
 		if file.AvailableTo.Before(now) {
 
-			if err := s.storage.DeleteFile(file.FileName); err.IsErr() {
+			if err := s.storage.DeleteFile(file.Id); err.IsErr() {
 				// Log lỗi nhưng tiếp tục sang file tiếp theo
-				log.Printf("Cleanup Error: Failed to delete physical file %s: %v", file.FileName, err)
+				log.Printf("Cleanup Error: Failed to delete physical file %s: %v, ignoring...", file.Id, err)
 				continue
 			}
 			var ownerID string

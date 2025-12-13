@@ -25,7 +25,7 @@ type FileRepository interface {
 	RegisterDownload(ctx context.Context, fileID string, userID string) *utils.ReturnStatus
 	GetFileDownloadHistory(ctx context.Context, fileID string) (*domain.FileDownloadHistory, *utils.ReturnStatus)
 	GetFileStats(ctx context.Context, fileID string) (*domain.FileStat, *utils.ReturnStatus)
-	GetAllAccessibleFiles(ctx context.Context, userIDop *string) ([]domain.File, *utils.ReturnStatus)
+	GetAccessibleFiles(ctx context.Context, userIDop string) ([]domain.File, *utils.ReturnStatus)
 }
 
 type fileRepository struct {
@@ -426,7 +426,7 @@ func (r *fileRepository) FindAll(ctx context.Context) ([]domain.File, *utils.Ret
 }
 
 func (r *fileRepository) RegisterDownload(ctx context.Context, fileID string, userID string) *utils.ReturnStatus {
-	_, err := r.db.ExecContext(ctx, `CALL proc_download($1, $2)`, fileID, userID)
+	_, err := r.db.ExecContext(ctx, `CALL proc_download($1, $2)`, fileID, sql.Null[string]{V: userID, Valid: userID != ""})
 
 	if err != nil {
 		return utils.ResponseMsg(utils.ErrCodeDatabaseError, err.Error())
@@ -521,33 +521,20 @@ func (r *fileRepository) GetFileStats(ctx context.Context, fileID string) (*doma
 	return &stat, nil
 }
 
-func (r *fileRepository) GetAllAccessibleFiles(ctx context.Context, userIDop *string) ([]domain.File, *utils.ReturnStatus) {
+func (r *fileRepository) GetAccessibleFiles(ctx context.Context, userID string) ([]domain.File, *utils.ReturnStatus) {
 	query := `
 		SELECT DISTINCT f.id
 		FROM files f LEFT JOIN shared s ON f.id = s.file_id
 		WHERE
-			(f.is_public OR $1 = s.user_id)
-		AND (NOW() >= f.available_from AND NOW() < f.available_to)
-		OR $1 = f.user_id
-		OR EXISTS (SELECT * FROM users WHERE id = $1 AND role = 'admin')
+		(NOW() >= f.available_from AND NOW() < f.available_to)
+		AND $1 = s.user_id
 		;
 	`
 
-	queryNull := `
-		SELECT DISTINCT f.id
-		FROM files f
-		WHERE
-			f.is_public
-		AND (NOW() >= f.available_from AND NOW() < f.available_to)
-	`
 	var rows *sql.Rows = nil
 	var err error = nil
 
-	if userIDop != nil {
-		rows, err = r.db.QueryContext(ctx, query, *userIDop)
-	} else {
-		rows, err = r.db.QueryContext(ctx, queryNull)
-	}
+	rows, err = r.db.QueryContext(ctx, query, userID)
 
 	if err != nil {
 		return nil, utils.ResponseMsg(utils.ErrCodeInternal, err.Error())

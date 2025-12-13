@@ -75,16 +75,15 @@ func (s *LocalStorage) GetFile(filename string) (io.Reader, *utils.ReturnStatus)
 	return reader, nil
 }
 
-func (s *LocalStorage) DeleteFile(filename string) *utils.ReturnStatus {
-	path := filepath.Clean(filepath.Join(s.UploadDir, filename))
-	if filename == "" {
-		log.Printf("[DEBUG DELETE] Attempting to delete file:\n- Filename (DB): %s\n- UploadDir: %s\n- Full Path: %s", filename, s.UploadDir, path)
-		return nil
+func (s *LocalStorage) DeleteFile(fileID string) *utils.ReturnStatus {
+	path := filepath.Clean(filepath.Join(s.UploadDir, fileID))
+	if fileID == "" {
+		return utils.ResponseMsg(utils.ErrCodeInternal, "No file ID specified to delete.")
 	}
 
 	// >>>>>> DÒNG DEBUG QUAN TRỌNG <<<<<<
 	// Dùng log package nếu bạn có, hoặc tạm dùng fmt.Println
-	log.Printf("[DEBUG DELETE] Attempting to delete file:\n- Filename (DB): %s\n- UploadDir: %s\n- Full Path: %s", filename, s.UploadDir, path)
+	log.Printf("[DEBUG DELETE] Attempting to delete file:\n- FileID (DB): %s\n- UploadDir: %s\n- Full Path: %s", fileID, s.UploadDir, path)
 	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	err := os.Remove(path)
@@ -95,7 +94,7 @@ func (s *LocalStorage) DeleteFile(filename string) *utils.ReturnStatus {
 		}
 
 		// Lỗi xóa file thông thường
-		return utils.ResponseMsg(utils.ErrCodeInternal, fmt.Sprintf("failed to delete file %s at %s: %s", filename, path, err))
+		return utils.ResponseMsg(utils.ErrCodeInternal, fmt.Sprintf("failed to delete file %s at %s: %s", fileID, path, err))
 	}
 	return nil
 }

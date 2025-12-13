@@ -489,7 +489,7 @@ paths:
         **Bao gồm:**
         - Danh sách file kèm metadata (status, thời gian hiệu lực, bảo mật, ...)
         - Pagination (`page`, `limit`) và tổng số file
-        - Summary (đếm active/pending/expired/deleted)
+        - Summary (đếm active/pending/expired)
       security:
         - BearerAuth: []
       parameters:
@@ -498,7 +498,7 @@ paths:
           description: Lọc theo trạng thái file
           schema:
             type: string
-            enum: [active, expired, pending, deleted, all]
+            enum: [active, expired, pending, all]
             default: all
         - name: page
           in: query
@@ -560,7 +560,7 @@ paths:
                       activeFiles: 28
                       pendingFiles: 5
                       expiredFiles: 9
-                      deletedFiles: 0
+
         "401":
           $ref: "#/components/responses/Unauthorized"
 
@@ -570,12 +570,9 @@ paths:
         - Files
       summary: Xem các file có thể tải về
       description: |
-        Trả về danh sách các file công khai hoặc, chia sẻ tới người dùng,
-        hoặc thuộc sở hữu của người dùng, với điều kiện là file còn mở và chưa hết hạn.
+        Trả về danh sách các file được chia sẻ tới người dùng, với điều kiện là file còn mở và chưa hết hạn.
 
-        API không yêu cầu authentication.
-        Khi không có Bearer Token, coi như đang truy cập ẩn danh. Chỉ trả về những
-        file công khai và còn hạn.
+        API yêu cầu authentication. Admin không có thêm quyền trong API này.
 
       security:
         - BearerAuth: []
@@ -628,6 +625,8 @@ paths:
                       limit: 10
                       totalFiles: 14
                       totalPages: 2
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /files/info/{id}:
     get:
@@ -1117,6 +1116,28 @@ paths:
                     error: File expired
                     message: File has expired
 
+        "423":
+          description: File chưa đến thời gian hiệu lực
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  availableFrom:
+                    type: string
+                    format: date-time
+                  hoursUntilAvailable:
+                    type: number
+              examples:
+                pending:
+                  summary: File chưa đến giờ
+                  value:
+                    error: File not yet available
+                    availableFrom: "2025-11-20T10:00:00Z"
+                    hoursUntilAvailable: 6
+
   /files/{shareToken}/download:
     get:
       tags:
@@ -1135,10 +1156,6 @@ paths:
         **Owner preview trong giai đoạn pending:**
         - Nếu requester là owner (JWT hợp lệ, `sub` trùng `file.owner.id`), hệ thống cho phép bypass trạng thái `pending` để chủ file có thể kiểm thử trước khi tới giờ.
         - Tất cả user khác vẫn nhận 423 "File not yet available" cho tới khi `availableFrom` đến.
-
-        **Notification khi file chuyển trạng thái:**
-        - Khuyến nghị cấu hình cronjob/background task gửi email/SMS/webhook khi file chuyển từ `pending` sang `active` để owner và whitelist nhận thông báo.
-        - Endpoint này không tự gửi notification; cần bật tính năng ở backend hoặc job scheduler (xem mục Appendices/Future Enhancements).
       security:
         - BearerAuth: []
         - {}
@@ -1548,7 +1565,6 @@ paths:
                     error: Forbidden
                     message: You don't have permission to access this resource
 
-  /policy/limits:
     patch:
       tags:
         - Admin
@@ -2044,7 +2060,7 @@ components:
             $ref: "#/components/schemas/Error"
           example:
             error: Unauthorized
-            message: Invalid or missing authentication token
+            message: Authentication token is required
 
     Forbidden:
       description: Forbidden - Insufficient permissions

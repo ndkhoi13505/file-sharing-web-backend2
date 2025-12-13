@@ -89,7 +89,7 @@ func (s *fileService) calculateValidityPeriod(req *dto.UploadRequest) (time.Time
 func (s *fileService) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader, req *dto.UploadRequest, ownerID *string) (*domain.File, *utils.ReturnStatus) {
 	// Kiểm tra kích thước file (Sử dụng MaxFileSizeMB từ Policy)
 	if fileHeader.Size > int64(s.cfg.Policy.MaxFileSizeMB)*1024*1024 {
-		return nil, utils.ResponseMsg(utils.ErrCodeBadRequest, fmt.Sprintf("File size exceeds the limit of %dMB", s.cfg.Policy.MaxFileSizeMB))
+		return nil, utils.Response(utils.ErrCodeUploadFileTooBig)
 	}
 
 	// 1. Tính toán thời gian hiệu lực
@@ -249,10 +249,6 @@ func (s *fileService) getFileInfo(ctx context.Context, id string, userID string,
 		return nil, nil, nil, err
 	}
 
-	if userID == "" {
-		return file, nil, nil, nil
-	}
-
 	now := time.Now()
 
 	file.Status = domain.FILE_ACTIVE
@@ -262,10 +258,14 @@ func (s *fileService) getFileInfo(ctx context.Context, id string, userID string,
 	} else if now.After(file.AvailableTo) {
 		file.Status = domain.FILE_EXPIRED
 	}
+
 	requester := domain.User{}
-	if err := s.userRepo.FindById(userID, &requester); err != nil {
-		return nil, nil, nil, err
+	if userID != "" {
+		if err := s.userRepo.FindById(userID, &requester); err != nil {
+			return nil, nil, nil, err
+		}
 	}
+
 	isAdmin := requester.Role == "admin"
 	owner_ := domain.User{}
 	var owner *domain.User = nil
@@ -288,10 +288,13 @@ func (s *fileService) getFileInfo(ctx context.Context, id string, userID string,
 			if !slices.Contains(shareds.UserIds, userID) {
 				return nil, nil, nil, utils.Response(utils.ErrCodeGetForbidden)
 			}
+		}
 
+		if file.OwnerId == nil || *file.OwnerId != userID {
 			if file.Status == domain.FILE_EXPIRED {
 				return nil, nil, nil, utils.ResponseArgs(utils.ErrCodeFileExpired,
 					gin.H{
+						"error":     "File expired",
 						"expiredAt": file.AvailableTo,
 					},
 				)
@@ -300,12 +303,14 @@ func (s *fileService) getFileInfo(ctx context.Context, id string, userID string,
 			if file.Status == domain.FILE_PENDING {
 				return nil, nil, nil, utils.ResponseArgs(utils.ErrCodeFileLocked,
 					gin.H{
+						"error":               "File not yet available",
 						"availableFrom":       file.AvailableFrom,
 						"hoursUntilAvailable": file.AvailableFrom.Sub(now).Hours(),
 					},
 				)
 			}
 		}
+
 	}
 
 	outShared := []string{}
@@ -419,12 +424,16 @@ func (s *fileService) GetFileDownloadHistory(ctx context.Context, fileID string,
 func (s *fileService) GetFileStats(ctx context.Context, fileID, userID string) (*domain.FileStat, *utils.ReturnStatus) {
 	file, err := s.fileRepo.GetFileByID(ctx, fileID)
 	if err.IsErr() {
-		return nil, err
+		return nil, utils.Response(utils.ErrCodeFileStatNotFound)
 	}
 
 	var requester domain.User
 	if err := s.userRepo.FindById(userID, &requester); err != nil {
 		return nil, err
+	}
+
+	if file.OwnerId == nil {
+		return nil, utils.Response(utils.ErrCodeFileStatNotFound)
 	}
 
 	isOwner := file.OwnerId != nil && *file.OwnerId == userID
@@ -436,8 +445,8 @@ func (s *fileService) GetFileStats(ctx context.Context, fileID, userID string) (
 	return s.fileRepo.GetFileStats(ctx, fileID)
 }
 
-func (s *fileService) GetAllAccessibleFiles(ctx context.Context, userID *string) ([]dto.AccessibleFile, *utils.ReturnStatus) {
-	files, err := s.fileRepo.GetAllAccessibleFiles(ctx, userID)
+func (s *fileService) GetAccessibleFiles(ctx context.Context, userID string) ([]dto.AccessibleFile, *utils.ReturnStatus) {
+	files, err := s.fileRepo.GetAccessibleFiles(ctx, userID)
 
 	if err != nil {
 		return nil, err

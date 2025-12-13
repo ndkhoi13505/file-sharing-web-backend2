@@ -50,7 +50,7 @@ Project sử dụng **OpenAPI 3.0.4** để định nghĩa API:
 |--------|----------|-------|------|
 | `POST` | `/files/upload` | Upload file | Optional |
 | `GET` | `/files/my` | Lấy danh sách file do user hiện tại upload | ✅ Bearer |
-| `GET` | `/files/available` | Lấy danh sách file có thể tải về | Optional |
+| `GET` | `/files/available` | Lấy danh sách file được chia sẻ tới người dùng hiện tại | ✅ Bearer |
 | `GET` | `/files/info/{id}` | Lấy thông tin file theo UUID (chỉ owner/admin) | ✅ Bearer |
 | `DELETE` | `/files/info/{id}` | Xóa file (chỉ owner/admin) | ✅ Bearer |
 | `GET` | `/files/stats/{id}` | Lấy thống kê download của file (chỉ owner/admin) | ✅ Bearer |
