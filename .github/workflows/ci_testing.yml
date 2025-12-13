@@ -19,14 +19,8 @@ jobs:
       - name: Prepare CI env
         run: cp example.env .env
 
-      - name: Start DB only
-        run: docker compose up -d db
-
-      - name: Wait for DB
-        run: |
-          until docker compose exec -T db pg_isready -U $DB_USER -d $DB_NAME; do
-            sleep 2
-          done
+      - name: Start containers
+        run: docker compose up -d
 
       - name: Run tests
         run: go test -v ./test
