@@ -289,7 +289,8 @@ func (s *fileService) getFileInfo(ctx context.Context, id string, userID string,
 				return nil, nil, nil, utils.Response(utils.ErrCodeGetForbidden)
 			}
 		}
-		if *file.OwnerId != userID {
+
+		if file.OwnerId == nil || *file.OwnerId != userID {
 			if file.Status == domain.FILE_EXPIRED {
 				return nil, nil, nil, utils.ResponseArgs(utils.ErrCodeFileExpired,
 					gin.H{
