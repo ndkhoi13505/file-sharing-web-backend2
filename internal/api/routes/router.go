@@ -13,7 +13,7 @@ type Route interface {
 
 func RegisterRoutes(r *gin.Engine, authService jwt.TokenService, authRepo repository.AuthRepository, routes ...Route) {
 
-	api := r.Group("/api")
+	api := r.Group("/")
 
 	middleware.InitAuthMiddleware(authService, authRepo)
 
@@ -42,5 +42,4 @@ func RegisterRoutes(r *gin.Engine, authService jwt.TokenService, authRepo reposi
 	}
 
 	r.GET("/", home)
-	r.GET("/api", home)
 }
