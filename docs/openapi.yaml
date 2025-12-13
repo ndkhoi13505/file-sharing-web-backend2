@@ -625,6 +625,8 @@ paths:
                       limit: 10
                       totalFiles: 14
                       totalPages: 2
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /files/info/{id}:
     get:
@@ -2058,7 +2060,7 @@ components:
             $ref: "#/components/schemas/Error"
           example:
             error: Unauthorized
-            message: Invalid or missing authentication token
+            message: Authentication token is required
 
     Forbidden:
       description: Forbidden - Insufficient permissions
