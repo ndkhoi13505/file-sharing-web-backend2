@@ -242,7 +242,7 @@ func (fh *FileHandler) GetFileInfoVerbose(ctx *gin.Context) {
 	})
 }
 
-func (fh *FileHandler) DownloadFile(ctx *gin.Context) {
+func (fh *FileHandler) getFileData(ctx *gin.Context) (*domain.File, []byte, *utils.ReturnStatus) {
 	fileToken := ctx.Param("shareToken")
 	password := ctx.Query("password")
 	userIDptr, exists := ctx.Get("userID")
@@ -253,43 +253,36 @@ func (fh *FileHandler) DownloadFile(ctx *gin.Context) {
 
 	info, file, download_err := fh.file_service.DownloadFile(ctx, fileToken, userID, password)
 	if download_err != nil {
-		download_err.Export(ctx)
-		return
+		return nil, nil, download_err
 	}
 
 	fileBytes, readerr := io.ReadAll(file)
 	if readerr != nil {
-		utils.ResponseMsg(utils.ErrCodeInternal, readerr.Error()).Export(ctx)
+		return nil, nil, utils.ResponseMsg(utils.ErrCodeInternal, readerr.Error())
+	}
+
+	return info, fileBytes, nil
+}
+
+func (fh *FileHandler) DownloadFile(ctx *gin.Context) {
+	info, file, err := fh.getFileData(ctx)
+	if err != nil {
+		err.Export(ctx)
 		return
 	}
 
-	ctx.Data(http.StatusOK, info.MimeType, fileBytes)
+	ctx.Data(http.StatusOK, info.MimeType, file)
 }
 
 func (fh *FileHandler) PreviewFile(ctx *gin.Context) {
-	fileToken := ctx.Param("shareToken")
-	password := ctx.Query("password")
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		utils.ResponseMsg(utils.ErrCodeGetForbidden, "You do not have permission to view this file").Export(ctx)
-		return
-	}
-
-	info, file, download_err := fh.file_service.DownloadFile(ctx, fileToken, userID.(string), password)
-	if download_err != nil {
-		download_err.Export(ctx)
-		return
-	}
-
-	fileBytes, readerr := io.ReadAll(file)
-	if readerr != nil {
-		utils.ResponseMsg(utils.ErrCodeInternal, readerr.Error()).Export(ctx)
+	info, file, err := fh.getFileData(ctx)
+	if err != nil {
+		err.Export(ctx)
 		return
 	}
 
 	ctx.Header("Content-Disposition", "inline; filename=\""+info.FileName+"\"")
-	ctx.Data(http.StatusOK, info.MimeType, fileBytes)
-	//ctx.DataFromReader(http.StatusOK, int64(len(fileBytes)), info.MimeType, file, extraHeaders)
+	ctx.Data(http.StatusOK, info.MimeType, file)
 }
 
 func (fh *FileHandler) GetFileDownloadHistory(ctx *gin.Context) {

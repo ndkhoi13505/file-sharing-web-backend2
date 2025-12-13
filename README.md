@@ -132,7 +132,7 @@ Chi tiết về tất cả endpoints có trong:
 |----------|-----------|
 | **Auth** | `POST /auth/register`, `/auth/login`, `/auth/logout`, `/auth/totp/*` |
 | **User** | `GET /user` |
-| **Files** | `POST /files/upload`, `GET /files/my`, `GET /files/available`, `GET /files/{shareToken}/download`, `GET /files/{shareToken}/preview` |
+| **Files** | `POST /files/upload`, `GET /files/my`, `GET /files/available`, `GET /files/{shareToken}/download`, `GET /files/{shareToken}/preview`, `GET/DELETE /files/info/id` |
 | **Admin** | `POST /admin/cleanup`, `GET/PATCH /admin/policy` |
 
 ### Base URL
