@@ -17,7 +17,9 @@ const (
 	ErrCodeUnauthorized    ErrorCode = "UNAUTHORIZED"
 	ErrCodeTooManyRequests ErrorCode = "TOO_MANY_REQUESTS"
 
-	ErrCodeFileUploadRequired ErrorCode = "File is required"
+	ErrCodeFileUploadRequired         ErrorCode = "File is required"
+	ErrCodeFileUploadPublicWithShared ErrorCode = "Public files are not allowed to have a whitelist"
+	ErrCodeFilePrivateNeedsAuth       ErrorCode = "Private uploads (isPublic=false/sharedWith) require authentication"
 
 	ErrCodeUserNotFound ErrorCode = "User does not exist or invalid id/email"
 	ErrCodeLoginInvalid ErrorCode = "Invalid email or password"
@@ -131,6 +133,18 @@ func (bee *ReturnStatus) Export(c *gin.Context) {
 		}
 		maps.Copy(out, args)
 		c.JSON(400, out)
+
+	case ErrCodeFilePrivateNeedsAuth:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Unauthorized",
+			"message": "Private uploads (isPublic=false/sharedWith) require authentication",
+		})
+
+	case ErrCodeFileUploadPublicWithShared:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad request",
+			"message": ErrCodeFileUploadPublicWithShared,
+		})
 
 	case ErrCodeUploadBearerRequired:
 		c.JSON(http.StatusUnauthorized, gin.H{

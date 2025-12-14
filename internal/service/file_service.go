@@ -210,26 +210,31 @@ func (s *fileService) DeleteFile(ctx context.Context, fileID string, userID stri
 	}
 	var requester domain.User
 	if errStatus := s.userRepo.FindById(userID, &requester); errStatus != nil {
-
 		return errStatus
 	}
+
 	// Kiểm tra quyền: Chỉ Owner hoặc Admin mới được xóa
 	isAdmin := requester.Role == "admin"
 	isOwner := file.OwnerId != nil && *file.OwnerId == userID
 	isAnonymous := file.OwnerId == nil
 
-	if isAnonymous || (!isOwner && !isAdmin) {
-		// Cần thêm kiểm tra quyền Admin tại đây
-		return utils.Response(utils.ErrCodeDeleteValidationErr)
+	if isAnonymous {
+		if !isAdmin {
+			return utils.Response(utils.ErrCodeDeleteValidationErr)
+		}
+	} else {
+		if !isOwner && !isAdmin {
+			return utils.Response(utils.ErrCodeDeleteValidationErr)
+		}
 	}
 
 	// Xóa vật lý trước
-	file.StorageName = fileID // Đảm bảo đúng tên file vật lý
-	if err := s.storage.DeleteFile(file.StorageName); err.IsErr() {
+	if err := s.storage.DeleteFile(fileID); err.IsErr() {
 		return err
 	}
 
-	if err := s.fileRepo.DeleteFile(ctx, fileID, userID); err.IsErr() {
+	if err := s.fileRepo.DeleteFile(ctx, fileID); err.IsErr() {
+		log.Println("Can't find file in database")
 		return err
 	}
 
@@ -378,7 +383,7 @@ func (s *fileService) GetFileDownloadHistory(ctx context.Context, fileID string,
 	isOwner := file.OwnerId != nil && *file.OwnerId == userID
 	if !isAdmin && !isOwner {
 		log.Println("Not the owner")
-		return nil, utils.Response(utils.ErrCodeGetForbidden)
+		return nil, utils.Response(utils.ErrCodeHistoryForbidden)
 	}
 	history, err := s.fileRepo.GetFileDownloadHistory(ctx, fileID)
 	if err.IsErr() {

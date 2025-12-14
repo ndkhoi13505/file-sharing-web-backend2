@@ -56,11 +56,13 @@ func (fh *FileHandler) UploadFile(ctx *gin.Context) {
 		userID = nil
 	}
 
-	if userID == nil && !req.IsPublic {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "Unauthorized",
-			"message": "Bearer token is required for authenticated uploads",
-		})
+	if userID == nil && (!req.IsPublic || req.SharedWith != nil) {
+		utils.Response(utils.ErrCodeFilePrivateNeedsAuth).Export(ctx)
+		return
+	}
+
+	if req.IsPublic && req.SharedWith != nil {
+		utils.Response(utils.ErrCodeFileUploadPublicWithShared).Export(ctx)
 		return
 	}
 

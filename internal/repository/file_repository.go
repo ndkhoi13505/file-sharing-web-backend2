@@ -17,7 +17,7 @@ type FileRepository interface {
 	CreateFile(ctx context.Context, file *domain.File) (*domain.File, *utils.ReturnStatus)
 	GetFileByID(ctx context.Context, id string) (*domain.File, *utils.ReturnStatus)
 	GetFileByToken(ctx context.Context, token string) (*domain.File, *utils.ReturnStatus)
-	DeleteFile(ctx context.Context, id string, userID string) *utils.ReturnStatus
+	DeleteFile(ctx context.Context, id string) *utils.ReturnStatus
 	GetMyFiles(ctx context.Context, userID string, params domain.ListFileParams) ([]domain.File, *utils.ReturnStatus)
 	GetTotalUserFiles(ctx context.Context, userID string) (int, *utils.ReturnStatus)
 	GetFileSummary(ctx context.Context, userID string) (*domain.FileSummary, *utils.ReturnStatus)
@@ -198,13 +198,13 @@ func (r *fileRepository) GetFileByToken(ctx context.Context, token string) (*dom
 	return &file, nil
 }
 
-func (r *fileRepository) DeleteFile(ctx context.Context, id string, userID string) *utils.ReturnStatus {
+func (r *fileRepository) DeleteFile(ctx context.Context, id string) *utils.ReturnStatus {
 	query := `
         DELETE FROM files
-        WHERE id = $1 AND user_id = $2
+        WHERE id = $1
     `
 
-	result, err := r.db.ExecContext(ctx, query, id, userID)
+	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return utils.ResponseMsg(utils.ErrCodeDatabaseError, err.Error())
 	}

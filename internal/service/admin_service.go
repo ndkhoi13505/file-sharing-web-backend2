@@ -141,17 +141,8 @@ func (s *adminService) CleanupExpiredFiles(ctx context.Context) (int, *utils.Ret
 				log.Printf("Cleanup Error: Failed to delete physical file %s: %v, ignoring...", file.Id, err)
 				continue
 			}
-			var ownerID string
-			if file.OwnerId != nil {
-				ownerID = *file.OwnerId
-			} else {
 
-				log.Printf("Cleanup Warning: Skipping metadata delete for Anonymous file %s. Requires specific repo method.", file.Id)
-				continue
-			}
-
-			// Xóa file (chỉ áp dụng cho file có Owner)
-			if err := s.fileRepo.DeleteFile(ctx, file.Id, ownerID); err.IsErr() {
+			if err := s.fileRepo.DeleteFile(ctx, file.Id); err.IsErr() {
 				// Log lỗi nhưng tiếp tục
 				log.Printf("Cleanup Error: Failed to delete metadata for file %s: %v", file.Id, err)
 				continue

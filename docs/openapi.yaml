@@ -448,6 +448,12 @@ paths:
                   value:
                     error: Validation error
                     message: availableFrom must be before availableTo and within allowed policy window
+                filePublicWithShared:
+                  summary: File public nhưng lại để whitelist
+                  value:
+                    error: Bad request
+                    message: Public files are not allowed to have a whitelist
+                
         "401":
           description: Thiếu hoặc sai Bearer token (khi upload với quyền riêng tư)
           content:
@@ -720,7 +726,7 @@ paths:
 
         **Quyền truy cập:**
         - Chỉ owner của file hoặc admin mới có thể xóa
-        - Anonymous uploads (file không có owner) **KHÔNG THỂ** xóa file sau khi upload
+        - Người đăng ẩn danh **KHÔNG THỂ** xóa file sau khi upload
       security:
         - BearerAuth: []
       parameters:
@@ -767,11 +773,7 @@ paths:
                   value:
                     error: Forbidden
                     message: You don't have permission to delete this file
-                anonymousUpload:
-                  summary: Anonymous upload không thể xóa
-                  value:
-                    error: Forbidden
-                    message: Anonymous uploads cannot be deleted
+
         "404":
           description: Không tìm thấy file với id
           content:
