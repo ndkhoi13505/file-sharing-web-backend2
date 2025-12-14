@@ -2,7 +2,7 @@ name: CI testing
 
 on:
   push:
-    branches: [main, refactor/cicd]
+    branches: [main, refactor/cicd, production]
   pull_request:
     branches: [main]
 
