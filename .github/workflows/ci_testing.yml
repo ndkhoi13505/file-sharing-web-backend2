@@ -16,8 +16,12 @@ jobs:
       - name: Check Go
         run: go version
 
-      - name: Prepare CI env
-        run: cp example.env .env
+      - name: Decrypt .env
+        run: |
+          echo "Decrypting..."
+          sops --decrypt --input-type dotenv --output-type dotenv --output .env dev.enc
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
       - name: Cleanup old containers & volumes
         run: docker compose down -v
