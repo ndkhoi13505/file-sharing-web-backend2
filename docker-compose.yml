@@ -1,21 +1,17 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
     image: postgres:17.5-alpine3.22
-    container_name: postgres-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${DB_PORT_EXTERNAL:-5435}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./internal/infrastructure/database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - app-networks
+      - app-net
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
       interval: 30s
@@ -23,25 +19,20 @@ services:
       retries: 3
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: file-sharing-api
+    image: longchutoa/file-sharing:${APP_TAG:-latest}
     restart: unless-stopped
     env_file:
       - .env
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "${SERVER_PORT}:8080"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     networks:
-      - app-networks
+      - app-net
 
 volumes:
   pgdata:
 
-
 networks:
-  app-networks:
+  app-net:
     driver: bridge

@@ -15,7 +15,7 @@ import (
 var DB *sql.DB
 
 func InitDB() error {
-	connStr := config.NewConfig().DNS()
+	connStr := config.NewConfig().DSN()
 
 	var err error
 	DB, err = sql.Open("postgres", connStr)
