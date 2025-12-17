@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dath-251-thuanle/file-sharing-web-backend2/config"
+	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB

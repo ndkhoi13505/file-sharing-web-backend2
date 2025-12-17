@@ -51,8 +51,9 @@ func TestMain(m *testing.M) {
 
 func setupEnv() {
 	if os.Getenv("DATABASE_URL") == "" {
+		//FOR LOCAL USE: you need to change the username (postgres) and password of your psql
 		os.Setenv("DATABASE_URL",
-			"postgres://postgres:566493@localhost:5432/file_sharing_test?sslmode=disable&options=-csearch_path=test_schema")
+			"postgres://postgres:password@localhost:5432/file_sharing_test?sslmode=disable&options=-csearch_path=test_schema")
 	}
 	if os.Getenv("SERVER_PORT") == "" {
 		os.Setenv("SERVER_PORT", "9999")

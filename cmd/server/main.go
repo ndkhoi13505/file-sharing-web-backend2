@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	log.Println("DB_HOST =", os.Getenv("DB_HOST"))
 	log.Println("DATABASE_URL =", os.Getenv("DATABASE_URL"))
 
 	// load .env only in local

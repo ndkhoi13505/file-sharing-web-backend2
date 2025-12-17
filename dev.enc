@@ -1,14 +1,15 @@
-SERVER_PORT=ENC[AES256_GCM,data:x1SkesI=,iv:O7xQ1n5G7Rw7VUX77mqSW+/TNy0z8uJMLAsanqHVC5s=,tag:Q0wzOrrLQD4AC4+V0AWNqg==,type:str]
-DATABASE_URL=ENC[AES256_GCM,data:8z3BqfXgDWI42rsLuNc4JBFmnqGuQj6YgSnuyMhWzfvtwFacubZevofGFn3RolB83iEJHMHTNldPMUksSO0=,iv:P7gEnGddHKlRD2boSqLolMD77YD85OCGJA4lLAMtFtA=,tag:UcRuDsy0toJZbHqWTnb4Zg==,type:str]
-DB_NAME=ENC[AES256_GCM,data:cZ8W29Dff4/U6Kvkbg==,iv:sofHU1jW0B7GDY/4+O5iB6grrwnYJzuKobDRUuvNvLc=,tag:p0SzTnhM9EGddCaLedfizQ==,type:str]
-DB_USER=ENC[AES256_GCM,data:qR6Wve2qtA==,iv:MS5mj5n1c9HD8+UA1hs7/wdIFWwoQ3ArDkBqsWCRZ80=,tag:w5Gv3IgUDMA6nbi3LXePdA==,type:str]
-DB_PASSWORD=ENC[AES256_GCM,data:vtopUMnktA==,iv:PHSKbpVddgDldi/R1DVsU1NjtZB03Jb3eemf1+6OvnA=,tag:R93jNgkD8k7hPBeY0g1Rjw==,type:str]
-JWT_SECRET_KEY=ENC[AES256_GCM,data:KCyAdkNyI64IG+NV,iv:XmDDqsMpYdKvZASvtyaQoFem+W8Bgd8C8Fzp94xPWzw=,tag:QFPHCA5bsNoF4Jlxg7/AQA==,type:str]
-CORS_ALLOWED_ORIGINS=ENC[AES256_GCM,data:iWxnLgRzaP75KTzk6zrbxztPJhBjJzlGKLlYabxvGHOgzUPHyo6FlFTajK4s0OJfwsj1IEIoU6vY9HFaeKmKUM3ZbnKO8Yfc,iv:rYvxZtTs02qtTvn/EONfXBi/wQNHikrte1U7CMiKQuw=,tag:wWSI7yW01OUmpTNKC7R5xg==,type:str]
-APP_TAG=ENC[AES256_GCM,data:WcJvqPaQJg==,iv:yRb4a/gHAq03gq7h38v5KCr0P3wMGVbM86e+hJN5cnk=,tag:7EyJImCvXA+9t/c2kca0eQ==,type:str]
-sops_age__list_0__map_enc=-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBRTDB4WWtpdHVwZ0g0Q1dI\nVFRKWlo5QlBibTV0RzlYLzY2V3dhNVJ1N25VCjVLMGhuRzYxTUdrd3NFVUF0MXRU\nR3RsSlNiVjA4TERoQ0lJVStXdDBjZE0KLS0tIHlvK3FNV1MxOUkyL2F5bEVwQm4y\nY0RmMEVMWWZaNmFEOG05aUhlVlV3U3cKeq3czCCN9eTKIWiOR6KDrawnFTt4wTt6\nEAtn93hyP7WmX4sLAii5CgNnngZOLi8bRfqL4TBbWVKQ7jxFSZM3pA==\n-----END AGE ENCRYPTED FILE-----\n
+SERVER_PORT=ENC[AES256_GCM,data:9mKSVpI=,iv:3RaWPdHuGJL0/0ZGSqfL7pgR8Lxu1mc+yiHH/1jYtQc=,tag:2APyE1e1YBGLORUKaVGmOQ==,type:str]
+API_PORT=ENC[AES256_GCM,data:vDNItxo=,iv:fz6heVXWu8SGSSjmyseCsnjZ45i0rQvlqQxgfGVqW7Q=,tag:Fth/rrEQLT2CfAhE2Ekj4Q==,type:str]
+DB_NAME=ENC[AES256_GCM,data:l4j+aafAW5hPRd4XFw==,iv:UMTVtYFWNcmc/XRCoAPj+4EEJv8q4/y2Y/4vCJgV56w=,tag:IHPdJmFtZCydLf/7rCoGow==,type:str]
+DB_USER=ENC[AES256_GCM,data:lblIjTYFaA==,iv:jK/LuU5DaR9Pp/nCZ8kq9qDkfOnF1j9qmN/iza3lBH0=,tag:YwJv9veHp7YsqI+O8aNjyQ==,type:str]
+DB_PASSWORD=ENC[AES256_GCM,data:YUBKF1tmbQ==,iv:06sErhVB71LKzDa0Xf3j9DOEyTuoQppz5LDFY+9GbVs=,tag:3HsiAYiOo1mlm0HjOETHcQ==,type:str]
+DATABASE_URL=ENC[AES256_GCM,data:QptHr5SPI/z/LZz7tGkL4ijTeiYXA4UYntO5gNSfa1/WgYK6a4gn5310Zor7QtgEjed8PeZ63jjGZ70rPuI=,iv:lz0Xkc+iNZM5xIoi6YvsYbSNUBJCN4B+onbxGjfRLjw=,tag:yMgCzuiobRLVSxw759p6TQ==,type:str]
+GIN_MODE=ENC[AES256_GCM,data:5DL05DmL,iv:vDZACHbF3nnxdMTne62kalFAGozsd9SYxFqFZrhPFig=,tag:dQMBlw6VuP8vkg+GOGxNkA==,type:str]
+CORS_ALLOWED_ORIGINS=ENC[AES256_GCM,data:PNE=,iv:IfaiOFfykKCqA5xtOCP8hWvL4kMCMbmzmA58rAxxyJc=,tag:yrkAwkxHdyWkzvhavJumzw==,type:str]
+JWT_SECRET_KEY=ENC[AES256_GCM,data:DltBcmg+jKs=,iv:cGcr08mqmMjgJeMlCmNuI7Vkr60YhXta18mr1mhWlp0=,tag:j7J/QfwWOgr/e6AEHfNAMQ==,type:str]
+sops_age__list_0__map_enc=-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSArZ0hvMFFnWjJNNmlnaGxr\nQzFoRGpHSVY0WnBHeDZhS0NGL1VkTjVFaVRZCkVNLzM1T3dtVDlWUlhlemM1MUty\ndy9IYkdkM1VXRlZ4UmNwNUQwQU5aSDAKLS0tIHlvMDR4Tm5nclNnSWIwRFN4MjZa\nc3ZwY0dobktnZjJCUjBuaWpxMERydlUKJtHPX7M558j1bFoW9FV5jUPRPKNMaAQr\n3K1/0D/zOdxD8DKrjpsw1ByfIAKBh/fx+9UmniCERHwIS9f2T9AckA==\n-----END AGE ENCRYPTED FILE-----\n
 sops_age__list_0__map_recipient=age10a0c2nksh6gu6vz6cg30ytzsjeveg2trzeuyma3xasjtu40zygrsr0xadq
-sops_lastmodified=2025-12-16T08:26:55Z
-sops_mac=ENC[AES256_GCM,data:VsHUu6iNVKrUEHARpbVi8Ko+TdmC2TkVjpTIPw8Ns0o2CcV/1iJl0nSxOnWsuB7MyrxqXcTDTgCpJxOtMzduTnVKeuyuWv+tckrisG9BIz2PPaxnExWcqdm70ul/nw8V9/+TprusImzXzy/Lk+eYTAWmygXMbqIfiJKLJFCpaqI=,iv:aKWF4M1ye14E4IAWOxHq3/H/zvC4fDT+ehHpfmOQv+A=,tag:VPGP6yir5Z/OwU2QFSx9NA==,type:str]
+sops_lastmodified=2025-12-17T04:49:59Z
+sops_mac=ENC[AES256_GCM,data:wI0F7jnEdnOYrrhJjdFeCVKK+A2aRCBoxi/aP4bSDGESx6boI8c7NOhCl+M7LQjUXh93/S1k6a/8Y+PBwzFTthzcVe5STLp5hKy0b3K9ClmqmQONzliKKJjdGef2JRSrZF6T6i6o77qVkkxg+cnff6QxMBEpNsa+kWzZvd3HZDI=,iv:ClKIUvoIM3TJO3VDIxnpxIegKtmhfOqQ+VYNze3eH4U=,tag:OSTRMW4zBR4n+E2/Uc5eoA==,type:str]
 sops_unencrypted_suffix=_unencrypted
 sops_version=3.11.0
