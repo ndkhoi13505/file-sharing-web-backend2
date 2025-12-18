@@ -29,8 +29,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & Push image
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}:${{ github.event.workflow_run.head_sha }}
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ github.event.workflow_run.head_sha }}
           docker build -t $env:IMAGE .
           docker push $env:IMAGE
 
@@ -48,5 +49,6 @@ jobs:
         run: |
           docker compose pull
           docker compose up -d
+
 
 
